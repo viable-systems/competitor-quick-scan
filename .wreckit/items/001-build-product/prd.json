@@ -1,0 +1,155 @@
+{
+  "schema_version": 1,
+  "id": "001-build-product",
+  "branch_name": "wreckit/001-build-product",
+  "user_stories": [
+    {
+      "id": "US-001",
+      "title": "Install dependencies and configure environment variables",
+      "acceptance_criteria": [
+        "@anthropic-ai/sdk package is added to package.json dependencies",
+        "npm install completes successfully without errors",
+        ".env.local.example file exists with ANTHROPIC_API_KEY placeholder and documentation",
+        ".env.local.example includes link to Anthropic console for obtaining API key",
+        "TypeScript type definitions exist in src/types/analysis.ts with AnalysisRequest, CompetitiveAnalysis, and AnalysisResponse interfaces",
+        "TypeScript compilation passes: npx tsc --noEmit completes without errors"
+      ],
+      "priority": 1,
+      "status": "done",
+      "notes": "Foundation for all subsequent work. Must complete before API implementation."
+    },
+    {
+      "id": "US-002",
+      "title": "Create Anthropic client utility and API route",
+      "acceptance_criteria": [
+        "src/lib/anthropic.ts exists with Anthropic client initialization using process.env.ANTHROPIC_API_KEY",
+        "analyzeCompetitor function accepts query string and returns object with analysis and markdown fields",
+        "Prompt engineering instructs Claude to return structured JSON with overview, strengths, weaknesses, marketPosition, and recommendations",
+        "generateMarkdownReport function formats analysis as markdown with proper headers and bullet points",
+        "src/app/api/analyze/route.ts exists as POST endpoint",
+        "API route validates input: rejects empty strings, rejects queries over 500 characters, validates query is a string",
+        "API route returns JSON with success boolean, data object, markdown string, and optional error string",
+        "API route handles errors: missing API key returns user-friendly message, API failures return 500 status",
+        "curl test to localhost:3000/api/analyze with valid query returns proper JSON structure",
+        "TypeScript compilation passes with API route types",
+        "Build succeeds: npm run build completes without errors"
+      ],
+      "priority": 1,
+      "status": "done",
+      "notes": "Core API layer. Must test API route independently before building UI."
+    },
+    {
+      "id": "US-003",
+      "title": "Build InputForm component with validation",
+      "acceptance_criteria": [
+        "src/components/InputForm.tsx exists and exports InputForm component",
+        "Component accepts onSubmit callback and isLoading boolean props",
+        "Form contains text input with placeholder 'Enter competitor URL or company name...'",
+        "Form contains submit button that shows 'Analyzing...' when isLoading is true",
+        "Input is disabled when isLoading is true",
+        "Submit button is disabled when isLoading is true or input is empty",
+        "Form validates input: prevents empty submissions, prevents submissions over 500 characters",
+        "Form implements 5-second debounce to prevent rapid duplicate submissions",
+        "Debounce shows alert message if user submits within 5 seconds of last submission",
+        "Component uses Tailwind CSS classes for styling",
+        "Examples text shows 'Examples: Stripe, shopify.com, Notion, etc.'",
+        "Component is client-side marked with 'use client' directive",
+        "TypeScript compilation passes with component types"
+      ],
+      "priority": 2,
+      "status": "done",
+      "notes": "User input interface. Must handle all edge cases gracefully."
+    },
+    {
+      "id": "US-004",
+      "title": "Build AnalysisCard component with export buttons",
+      "acceptance_criteria": [
+        "src/components/AnalysisCard.tsx exists and exports AnalysisCard component",
+        "Component accepts query, analysis, onCopy, and onDownload props",
+        "Card displays query in header",
+        "Card contains copy button labeled 'Copy'",
+        "Card contains download button labeled 'Download'",
+        "All sections display: Company Overview, Key Strengths, Key Weaknesses, Market Position, Recommendations",
+        "Strengths, Weaknesses, and Recommendations display as bullet lists",
+        "Overview and Market Position display as paragraphs",
+        "Component uses Tailwind CSS classes for responsive design",
+        "Component is client-side marked with 'use client' directive",
+        "TypeScript compilation passes with component types"
+      ],
+      "priority": 2,
+      "status": "done",
+      "notes": "Display component for results. Must handle dynamic content from API."
+    },
+    {
+      "id": "US-005",
+      "title": "Build LoadingState and ErrorDisplay components",
+      "acceptance_criteria": [
+        "src/components/LoadingState.tsx exists and exports LoadingState component",
+        "LoadingState displays animated spinner",
+        "LoadingState displays 'Analyzing competitor... This may take a moment.' message",
+        "src/components/ErrorDisplay.tsx exists and exports ErrorDisplay component",
+        "ErrorDisplay accepts message and onRetry props",
+        "ErrorDisplay shows error message in red-tinted container",
+        "ErrorDisplay contains 'Try Again' button that calls onRetry",
+        "Both components use Tailwind CSS classes",
+        "Both components are client-side marked with 'use client' directive",
+        "TypeScript compilation passes with component types"
+      ],
+      "priority": 2,
+      "status": "done",
+      "notes": "Supporting UI components for better user experience."
+    },
+    {
+      "id": "US-006",
+      "title": "Implement main page with state management and export functionality",
+      "acceptance_criteria": [
+        "src/app/page.tsx is replaced with full implementation",
+        "Page manages state object with status ('idle', 'loading', 'success', 'error'), query, analysis, markdown, and error fields",
+        "handleAnalyze function calls /api/analyze with POST request",
+        "handleAnalyze sets status to 'loading' during API call",
+        "handleAnalyze sets status to 'success' with data on successful response",
+        "handleAnalyze sets status to 'error' with error message on failure",
+        "handleCopy function copies markdown to clipboard using navigator.clipboard API",
+        "handleCopy shows success alert on copy",
+        "handleCopy shows error alert on failure",
+        "handleDownload function creates markdown Blob and triggers download",
+        "Download filename format: 'competitor-analysis-{query}.md' with special characters replaced",
+        "Page renders InputForm at top",
+        "Page renders LoadingState when status is 'loading'",
+        "Page renders ErrorDisplay when status is 'error'",
+        "Page renders AnalysisCard when status is 'success'",
+        "Page includes header with title 'Competitor Quick Scan' and description",
+        "Page uses gradient background and responsive layout",
+        "Page is client-side marked with 'use client' directive",
+        "TypeScript compilation passes",
+        "Build succeeds: npm run build completes with zero errors"
+      ],
+      "priority": 3,
+      "status": "done",
+      "notes": "Main integration point. Connects all components and implements complete user flow."
+    },
+    {
+      "id": "US-007",
+      "title": "Verify production build and test all functionality",
+      "acceptance_criteria": [
+        "npm run build completes successfully with zero errors",
+        "npm start runs production server successfully",
+        "All TypeScript compilation passes: npx tsc --noEmit",
+        "No console warnings or errors in browser DevTools in production mode",
+        "Complete user flow works in production: enter query → analyze → see results → copy → download",
+        "Copy-to-clipboard functionality works in multiple browsers (Chrome, Firefox, Safari)",
+        "Download functionality works and creates valid .md file",
+        "Responsive design works at 375px (mobile), 768px (tablet), 1920px (desktop)",
+        "Input validation works for edge cases: empty string, whitespace-only, over-500 characters",
+        "5-second debounce prevents rapid submissions",
+        "Error handling works with missing API key and invalid queries",
+        "Test queries work: 'Stripe', 'shopify.com', 'Notion', 'Airbnb'",
+        "Optional: README.md exists with setup and usage instructions",
+        "Optional: layout.tsx includes viewport meta tag"
+      ],
+      "priority": 4,
+      "status": "done",
+      "notes": "Final verification phase. Ensure production readiness with comprehensive testing."
+    }
+  ]
+}
